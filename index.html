@@ -1,0 +1,211 @@
+<!doctype>
+<html>
+
+<head>
+<script type="text/javascript" src="node_modules/web3/dist/web3.js"></script>
+<script type="text/javascript" src="./contracts.js"></script>
+<script type="text/javascript">
+
+    function pad(n, width, z) {
+        z = z || '0';
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    }
+
+    var web3 = require('web3');
+
+    web3.setProvider(new web3.providers.HttpProvider("http://localhost:8081"));
+
+    var desc = namereg.abi;
+    var addr = namereg.addr;
+    var NameReg = web3.eth.contract(namereg.abi);
+    var nameReg = new NameReg(namereg.addr);
+
+    function createExampleContract() {
+        web3.eth.defaultAccount = web3.eth.coinbase;
+        nameReg = new NameReg({data: namereg.binary, gas: 3000000});
+    }
+
+    function lookupName() {
+        var name = document.getElementById('lookup.name').value;
+        var owner = nameReg.addrByName(name);
+        var data = nameReg.data(owner);
+
+        var output = '\nname: \t' + name + '\nowner:\t' + owner + '\ndata: ' + data;
+        document.getElementById('result').innerText = output;
+    }
+
+    function getData(addr) {
+        var data = '';
+        var testdata = '';
+
+        var dataindices = '';
+
+        var datalen = nameReg.datalen(addr);
+        console.log("DATAlen", datalen.toString());
+
+        for (var i = 0 ; i < datalen; i++) {
+            data += nameReg.data(addr, i);
+            testdata += i+":"+nameReg.data(addr, i) + " ";
+        }
+
+        console.log(testdata);
+        return data;
+    }
+
+    function getMyName() {
+        var addr = web3.eth.coinbase;
+        var name = nameReg.nameByAddr(addr);
+        //var data = nameReg.data(addr);
+        var output = '\nname: \t' + name + '\nowner:\t' + addr + '\ndata: ' + getData(addr);
+        document.getElementById('result').innerText = output;
+    }
+
+    function register(addr, name, data) {
+        if (typeof(name) === 'undefined' || typeof(data) === 'undefined') {
+            name = document.getElementById('reg.name').value;
+            data = document.getElementById('reg.data').value;
+        }
+
+        var inData = "12345678901234567890abcdefghijklmnopqrstuvwxyzzzzzzzzz";
+        //var inData = "ABC123";
+        var name = "Connor";
+        var address = '0x0';
+        //var data = ['abcdefgijklmnopqrstuvwxyz1234567', '890cpk']
+        console.log("registering ", name, data);
+
+        var data = web3.sha3(web3.fromAscii('register(address,bytes32,bytes)')).slice(2, 10);
+
+        data += pad(web3.eth.coinbase.slice(2), 64);
+
+        data += web3.fromAscii(name, 32).slice(2);
+
+        data += pad(web3.toHex(inData.length).slice(2), 64);
+
+        var strchunks = inData.match(/.{1,32}/g);
+
+        var revData = '';
+
+        console.log("chunk length", strchunks.length);
+
+        for (var i = 0 ; i < strchunks.length; i++) {
+            revData += strchunks[i].split("").reverse().join("");
+            data += pad(web3.fromAscii(strchunks[i].split("").reverse().join("")).slice(2), 64);
+        }
+
+        web3.eth.sendTransaction({
+            from: web3.eth.coinbase,
+            to: nameReg.address,
+            data: '0x' + data,
+            gasPrice: 10000000000000,
+            gas: 3000000
+        });
+    }
+
+    function setData(data) {
+
+        if (typeof(data) === 'undefined') {
+            data = document.getElementById('set.data').value;
+        }
+
+        console.log("setting name data to ", data);
+
+
+        nameReg.editData.sendTransaction(data, {from: web3.eth.coinbase, gas: 3000000});
+
+        var newRegister = nameReg.registerEvent({owner: web3.eth.coinbase});
+        newRegister.watch(function(err, res) {
+            if (err) alert (err);
+            console.log("Registration result", res, res.args);
+            newRegister.stopWatching();
+        });
+    }
+
+    /*
+    function chown() {
+        var name = document.getElementById('chown.name').value;
+        var newOwner = document.getElementById('chown.newowner').value;
+
+        console.log("Transferring ownership of ", name, "to", newOwner);
+
+        nameReg.transfer.sendTransaction(name, newOwner, {from: web3.eth.coinbase, gas: 3000000});
+
+        var newTransfer = nameReg.registerEvent({owner: web3.eth.coinbase});
+        newTransfer.watch(function(err, res) {
+            if (err) alert(err);
+            console.log("Transfer result", res, res.args);
+            newTransfer.stopWatching()
+        });
+    }
+    */
+
+    function getEvents() {
+        var logEvent = nameReg.registerEvent({}, {
+            fromBlock: 0,
+            toBlock: 'latest'
+        });
+
+        var logs = logEvent.get();
+        console.log("LOGS", logs);
+    }
+
+    var logEvent = nameReg.registerEvent();
+
+    logEvent.watch(function(err, res) {
+        console.log("Watch received ", err, res);
+        var txt = document.getElementById('logs').innerText;
+        var newtxt = JSON.stringify(res.args) + '\n' + txt;
+        document.getElementById('logs').innerText = newtxt;
+    });
+
+</script>
+</head>
+<body>
+    <h1>Name registry testing</h1>
+    <!-- <div id="source"></div>  -->
+
+    <div class='create'>
+        <button type="button" onClick="createExampleContract();">create new name registry</button>
+    </div>
+
+    <div class='register'>
+        Register a Name
+        <input type="text" id="reg.name" placeholder="Name"></input>
+        <input type="text" id="reg.data" placeholder="Data"></input>
+        <input type="button" onclick="register()" value="Register"></input>
+    </div>
+
+    <div class='setdata'>
+        Set name data
+        <input type="text" id="set.data" placeholder="Data"></input>
+        <input type="button" onclick="setData()" value="Set Data"></input>
+    </div>
+
+    <!--
+    <div class='chown'>
+        Change ownership of name
+        <input type="number" id="chown.name" placeholder="Name"></input>
+        <input type="number" id="chown.newowner" placeholder="New Owner"></input>
+        <input type="button" onclick="chown()" value="Chown"></input>
+    </div>
+    -->
+
+    <div class="lookup">
+        Lookup info for a name
+        <input type="text" id="lookup.name" onKeyUp="lookupName()"></input>
+    </div>
+
+    <div class="myname">
+        Lookup my name
+        <input type="button" value="lookup" onclick="getMyName()"></input>
+    </div>
+
+    <div class="events">
+        Pull in all events
+        <input type="button" value="lookup" onclick="getEvents()"></input>
+    </div>
+
+    <div id="result"></div>
+    <div id="logs"></div>
+</body>
+</html>

@@ -1,0 +1,212 @@
+[
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "newRegisterAddr",
+            "type" : "address"
+         },
+         {
+            "name" : "name",
+            "type" : "bytes32"
+         },
+         {
+            "name" : "d",
+            "type" : "bytes"
+         }
+      ],
+      "name" : "register",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [],
+      "name" : "testaddr",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         }
+      ],
+      "name" : "datalen",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "uint256"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "len",
+            "type" : "uint256"
+         },
+         {
+            "name" : "d",
+            "type" : "bytes"
+         }
+      ],
+      "name" : "editData",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         }
+      ],
+      "name" : "nameByAddr",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "bytes32"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [],
+      "name" : "testname",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "bytes32"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "name",
+            "type" : "bytes32"
+         }
+      ],
+      "name" : "release",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "name",
+            "type" : "bytes32"
+         },
+         {
+            "name" : "newOwner",
+            "type" : "address"
+         }
+      ],
+      "name" : "transfer",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [],
+      "name" : "owner",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [
+         {
+            "name" : "",
+            "type" : "bytes32"
+         }
+      ],
+      "name" : "addrByName",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "name",
+            "type" : "bytes32"
+         }
+      ],
+      "name" : "test",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         },
+         {
+            "name" : "",
+            "type" : "uint256"
+         }
+      ],
+      "name" : "data",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "bytes1"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "inputs" : [],
+      "type" : "constructor"
+   },
+   {
+      "anonymous" : false,
+      "inputs" : [
+         {
+            "indexed" : true,
+            "name" : "owner",
+            "type" : "address"
+         },
+         {
+            "indexed" : false,
+            "name" : "message",
+            "type" : "bytes32"
+         },
+         {
+            "indexed" : false,
+            "name" : "success",
+            "type" : "bool"
+         }
+      ],
+      "name" : "registerEvent",
+      "type" : "event"
+   }
+]

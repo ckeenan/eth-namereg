@@ -1,0 +1,20 @@
+{
+    "name": "eth-node-namereg",
+    "author": "Connor Keenan",
+    "scripts": {
+        "test": "mocha"
+    },
+    "dependencies": {
+        "mocha": "*",
+        "superagent": "*",
+        "log4js": "*",
+    	"web3": "*",
+    	"async": "*",
+    	"redis": "*",
+    	"express": "~4.0.0",
+    	"morgan": "~1.0.0",
+    	"request": "*",
+    	"ethereumjs-lib": "*",
+    	"body-parser": "~1.0.0"
+    }
+}
