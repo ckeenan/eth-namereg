@@ -36,16 +36,9 @@ contract NameReg {
       owner = msg.sender;
    }
 
-   function register(address newRegisterAddr, bytes32 name, bytes d) external nameAvailable(name, "register.nameUnavailable")  {
+   function register(address newRegisterAddr, bytes32 name) external nameAvailable(name, "register.nameUnavailable")  {
       if (msg.value > 0)
          newRegisterAddr.send(msg.value);
-
-      testaddr = newRegisterAddr;
-      testname = name;
-
-      data[newRegisterAddr].length = d.length;
-      datalen[newRegisterAddr] = d.length;
-      data[newRegisterAddr] = d;
 
       bytes32 oldName = nameByAddr[newRegisterAddr];
 
@@ -61,7 +54,9 @@ contract NameReg {
    function release(bytes32 name) isOwner(name, "release.notOwner") {
       nameByAddr[tx.origin] = 0x0;
       addrByName[name] = 0x0;
-
+      
+      //Note: currently data persists in the event that address owner wants to reinstate a name to it. Is this fine?
+      
       registerEvent(tx.origin, "release", true);
    }
 
@@ -70,32 +65,38 @@ contract NameReg {
       nameByAddr[newOwner] = name;
       addrByName[name] = newOwner;
 
-      data[newOwner].length = data[tx.origin].length;
+      //transfer data
       data[newOwner] = data[tx.origin];
-      datalen[newOwner] = datalen[tx.origin];
+      delete data[tx.origin];
 
       registerEvent(tx.origin, "transfer", true);
    }
-
-   function editData(uint len, bytes d) external {
-      data[tx.origin].length = d.length;
-      datalen[tx.origin] = d.length;
-      data[tx.origin] = d;
-
-      registerEvent(tx.origin, "editData", true);
+   
+   /*
+   Unless there's an easier way to dynamically edit fields of a struct, it has to be manual atm. Add more as required.
+   */
+   
+   function editTwitterVerified(bool status) external {
+      data[tx.origin].twitterVerified = status;
+      
+      registerEvent(tx.origin, "edit.TwitterVerified", true);
    }
 
-   function test(bytes32 name) external {
-      testname = name;
-     // testaddr = addr;
+   function editTwitterVerifiedLink(bytes link) external {
+      data[tx.origin].twitterVerifiedLink = link;
+      
+      registerEvent(tx.origin, "edit.TwitterVerifiedLink", true);
    }
 
    address public owner;
-   address public testaddr;
-   bytes32 public testname;
+   
+   struct user {
+      //insert more fields here.
+      bool twitterVerified;
+      bytes twitterVerifiedLink;
+   }
 
-   mapping (address => bytes) public data;
-   mapping (address => uint) public datalen;
+   mapping (address => user) public data;
    mapping (address => bytes32) public nameByAddr;
    mapping (bytes32 => address) public addrByName;
-}
+}    
