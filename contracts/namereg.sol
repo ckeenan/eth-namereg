@@ -36,7 +36,7 @@ contract NameReg {
       owner = msg.sender;
    }
 
-   function register(address newRegisterAddr, bytes32 name) external nameAvailable(name, "register.nameUnavailable")  {
+   function register(address newRegisterAddr, bytes32 name, bytes epk) external nameAvailable(name, "register.nameUnavailable")  {
       if (msg.value > 0)
          newRegisterAddr.send(msg.value);
 
@@ -48,15 +48,18 @@ contract NameReg {
       nameByAddr[newRegisterAddr] = name;
       addrByName[name] = newRegisterAddr;
 
+      // save encrypted private key at registration
+      userData[newRegisterAddr]["epk"].length = epk.length;
+      userDataLen[newRegisterAddr]["epk"] = epk.length;
+      userData[newRegisterAddr]["epk"] = epk;
+
       registerEvent(newRegisterAddr, "register", true);
    }
 
    function release(bytes32 name) isOwner(name, "release.notOwner") {
       nameByAddr[tx.origin] = 0x0;
       addrByName[name] = 0x0;
-      
-      //Note: currently data persists in the event that address owner wants to reinstate a name to it. Is this fine?
-      
+
       registerEvent(tx.origin, "release", true);
    }
 
@@ -65,38 +68,35 @@ contract NameReg {
       nameByAddr[newOwner] = name;
       addrByName[name] = newOwner;
 
-      //transfer data
-      data[newOwner] = data[tx.origin];
-      delete data[tx.origin];
-
       registerEvent(tx.origin, "transfer", true);
-   }
-   
-   /*
-   Unless there's an easier way to dynamically edit fields of a struct, it has to be manual atm. Add more as required.
-   */
-   
-   function editTwitterVerified(bool status) external {
-      data[tx.origin].twitterVerified = status;
-      
-      registerEvent(tx.origin, "edit.TwitterVerified", true);
+      registerEvent(newOwner, "transfer", true);
    }
 
-   function editTwitterVerifiedLink(bytes link) external {
-      data[tx.origin].twitterVerifiedLink = link;
-      
-      registerEvent(tx.origin, "edit.TwitterVerifiedLink", true);
+   function transferDataField(bytes32 field, address newOwner) {
+      userDataLen[newOwner][field] = userDataLen[tx.origin][field];
+      delete userDataLen[tx.origin][field];
+
+      userData[newOwner][field].length = userData[tx.origin][field].length;
+      userData[newOwner][field] = userData[tx.origin][field];
+      delete userData[tx.origin][field];
+
+      registerEvent(tx.origin, field, true);
+      registerEvent(newOwner, field, true);
+   }
+
+   function editField(bytes32 f, bytes input) external {
+      userData[tx.origin][f].length = input.length;
+      userDataLen[tx.origin][f] = input.length;
+      userData[tx.origin][f] = input;
+
+      registerEvent(tx.origin, f, true);
    }
 
    address public owner;
-   
-   struct user {
-      //insert more fields here.
-      bool twitterVerified;
-      bytes twitterVerifiedLink;
-   }
 
-   mapping (address => user) public data;
+   mapping (address => mapping (bytes32 => bytes)) public userData;
+   mapping (address => mapping (bytes32 => uint)) public userDataLen;
+
    mapping (address => bytes32) public nameByAddr;
    mapping (bytes32 => address) public addrByName;
 }    

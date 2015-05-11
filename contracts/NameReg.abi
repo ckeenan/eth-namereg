@@ -9,6 +9,10 @@
          {
             "name" : "name",
             "type" : "bytes32"
+         },
+         {
+            "name" : "epk",
+            "type" : "bytes"
          }
       ],
       "name" : "register",
@@ -61,6 +65,47 @@
       "type" : "function"
    },
    {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "field",
+            "type" : "bytes32"
+         },
+         {
+            "name" : "newOwner",
+            "type" : "address"
+         }
+      ],
+      "name" : "transferDataField",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         },
+         {
+            "name" : "",
+            "type" : "bytes32"
+         },
+         {
+            "name" : "",
+            "type" : "uint256"
+         }
+      ],
+      "name" : "userData",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "bytes1"
+         }
+      ],
+      "type" : "function"
+   },
+   {
       "constant" : true,
       "inputs" : [],
       "name" : "owner",
@@ -90,45 +135,45 @@
       "type" : "function"
    },
    {
-      "constant" : false,
-      "inputs" : [
-         {
-            "name" : "status",
-            "type" : "bool"
-         }
-      ],
-      "name" : "editTwitterVerified",
-      "outputs" : [],
-      "type" : "function"
-   },
-   {
-      "constant" : false,
-      "inputs" : [
-         {
-            "name" : "link",
-            "type" : "bytes"
-         }
-      ],
-      "name" : "editTwitterVerifiedLink",
-      "outputs" : [],
-      "type" : "function"
-   },
-   {
       "constant" : true,
       "inputs" : [
          {
             "name" : "",
             "type" : "address"
+         },
+         {
+            "name" : "",
+            "type" : "bytes32"
          }
       ],
-      "name" : "data",
+      "name" : "userDataLen",
       "outputs" : [
          {
-            "name" : "twitterVerified",
-            "type" : "bool"
+            "name" : "",
+            "type" : "uint256"
          }
       ],
       "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "f",
+            "type" : "bytes32"
+         },
+         {
+            "name" : "input",
+            "type" : "bytes"
+         }
+      ],
+      "name" : "editField",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "inputs" : [],
+      "type" : "constructor"
    },
    {
       "anonymous" : false,
