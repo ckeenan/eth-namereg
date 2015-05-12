@@ -11,56 +11,11 @@
             "type" : "bytes32"
          },
          {
-            "name" : "d",
+            "name" : "epk",
             "type" : "bytes"
          }
       ],
       "name" : "register",
-      "outputs" : [],
-      "type" : "function"
-   },
-   {
-      "constant" : true,
-      "inputs" : [],
-      "name" : "testaddr",
-      "outputs" : [
-         {
-            "name" : "",
-            "type" : "address"
-         }
-      ],
-      "type" : "function"
-   },
-   {
-      "constant" : true,
-      "inputs" : [
-         {
-            "name" : "",
-            "type" : "address"
-         }
-      ],
-      "name" : "datalen",
-      "outputs" : [
-         {
-            "name" : "",
-            "type" : "uint256"
-         }
-      ],
-      "type" : "function"
-   },
-   {
-      "constant" : false,
-      "inputs" : [
-         {
-            "name" : "len",
-            "type" : "uint256"
-         },
-         {
-            "name" : "d",
-            "type" : "bytes"
-         }
-      ],
-      "name" : "editData",
       "outputs" : [],
       "type" : "function"
    },
@@ -73,18 +28,6 @@
          }
       ],
       "name" : "nameByAddr",
-      "outputs" : [
-         {
-            "name" : "",
-            "type" : "bytes32"
-         }
-      ],
-      "type" : "function"
-   },
-   {
-      "constant" : true,
-      "inputs" : [],
-      "name" : "testname",
       "outputs" : [
          {
             "name" : "",
@@ -122,6 +65,47 @@
       "type" : "function"
    },
    {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "field",
+            "type" : "bytes32"
+         },
+         {
+            "name" : "newOwner",
+            "type" : "address"
+         }
+      ],
+      "name" : "transferDataField",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         },
+         {
+            "name" : "",
+            "type" : "bytes32"
+         },
+         {
+            "name" : "",
+            "type" : "uint256"
+         }
+      ],
+      "name" : "userData",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "bytes1"
+         }
+      ],
+      "type" : "function"
+   },
+   {
       "constant" : true,
       "inputs" : [],
       "name" : "owner",
@@ -151,18 +135,6 @@
       "type" : "function"
    },
    {
-      "constant" : false,
-      "inputs" : [
-         {
-            "name" : "name",
-            "type" : "bytes32"
-         }
-      ],
-      "name" : "test",
-      "outputs" : [],
-      "type" : "function"
-   },
-   {
       "constant" : true,
       "inputs" : [
          {
@@ -171,16 +143,32 @@
          },
          {
             "name" : "",
-            "type" : "uint256"
+            "type" : "bytes32"
          }
       ],
-      "name" : "data",
+      "name" : "userDataLen",
       "outputs" : [
          {
             "name" : "",
-            "type" : "bytes1"
+            "type" : "uint256"
          }
       ],
+      "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "f",
+            "type" : "bytes32"
+         },
+         {
+            "name" : "input",
+            "type" : "bytes"
+         }
+      ],
+      "name" : "editField",
+      "outputs" : [],
       "type" : "function"
    },
    {

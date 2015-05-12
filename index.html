@@ -14,7 +14,7 @@
 
     var web3 = require('web3');
 
-    web3.setProvider(new web3.providers.HttpProvider("http://localhost:8081"));
+    web3.setProvider(new web3.providers.HttpProvider("http://localhost:8080"));
 
     var desc = namereg.abi;
     var addr = namereg.addr;
@@ -28,25 +28,29 @@
 
     function lookupName() {
         var name = document.getElementById('lookup.name').value;
+        var field = document.getElementById('lookup.field').value;
+
         var owner = nameReg.addrByName(name);
-        var data = nameReg.data(owner);
+
+        //var data = nameReg.data(owner);
+        var data = getData(owner, field);
 
         var output = '\nname: \t' + name + '\nowner:\t' + owner + '\ndata: ' + data;
         document.getElementById('result').innerText = output;
     }
 
-    function getData(addr) {
+    function getData(addr, key) {
         var data = '';
         var testdata = '';
 
         var dataindices = '';
 
-        var datalen = nameReg.datalen(addr);
+        var datalen = nameReg.userDataLen(addr, key);
         console.log("DATAlen", datalen.toString());
 
         for (var i = 0 ; i < datalen; i++) {
-            data += nameReg.data(addr, i);
-            testdata += i+":"+nameReg.data(addr, i) + " ";
+            data += nameReg.userData(addr, key, i);
+            testdata += i+":"+nameReg.userData(addr, i) + " ";
         }
 
         console.log(testdata);
@@ -57,8 +61,35 @@
         var addr = web3.eth.coinbase;
         var name = nameReg.nameByAddr(addr);
         //var data = nameReg.data(addr);
-        var output = '\nname: \t' + name + '\nowner:\t' + addr + '\ndata: ' + getData(addr);
+        var output = '\nname: \t' + name + '\nowner:\t' + addr + '\ndata: ' + getData(addr, "name");
         document.getElementById('result').innerText = output;
+    }
+
+    function editField() {
+        var key = document.getElementById('set.field').value;
+        var value = document.getElementById('set.data').value;
+
+//        var data = web3.sha3(web3.fromAscii('editField(bytes32,bytes32,bytes)')).slice(2, 10);
+        var data = web3.sha3(web3.fromAscii('editField(bytes32,bytes)')).slice(2, 10);
+        data += web3.fromAscii(key, 32).slice(2);
+        //data += web3.fromAscii("name", 32).slice(2);
+
+        var byteData = value;
+        data += pad(web3.toHex(byteData.length).slice(2), 64);
+
+        var strchunks = byteData.match(/.{1,32}/g);
+
+        for (var i = 0 ; i < strchunks.length; i++) {
+            data += pad(web3.fromAscii(strchunks[i].split("").reverse().join("")).slice(2), 64);
+        }
+
+        web3.eth.sendTransaction({
+            from: web3.eth.coinbase,
+            to: nameReg.address,
+            data: '0x' + data,
+            gasPrice: 10000000000000,
+            gas: 3000000
+        });
     }
 
     function register(addr, name, data) {
@@ -67,6 +98,7 @@
             data = document.getElementById('reg.data').value;
         }
 
+        // Pretend private key
         var inData = "12345678901234567890abcdefghijklmnopqrstuvwxyzzzzzzzzz";
         //var inData = "ABC123";
         var name = "Connor";
@@ -177,8 +209,9 @@
 
     <div class='setdata'>
         Set name data
+        <input type="text" id="set.field" placeholder="Field"></input>
         <input type="text" id="set.data" placeholder="Data"></input>
-        <input type="button" onclick="setData()" value="Set Data"></input>
+        <input type="button" onclick="editField()" value="Set Data"></input>
     </div>
 
     <!--
@@ -192,7 +225,9 @@
 
     <div class="lookup">
         Lookup info for a name
-        <input type="text" id="lookup.name" onKeyUp="lookupName()"></input>
+        <input type="text" id="lookup.field"></input>
+        <input type="text" id="lookup.name"></input>
+        <input type="button" onclick="lookupName()"></input>
     </div>
 
     <div class="myname">

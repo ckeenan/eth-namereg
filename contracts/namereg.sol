@@ -36,16 +36,9 @@ contract NameReg {
       owner = msg.sender;
    }
 
-   function register(address newRegisterAddr, bytes32 name, bytes d) external nameAvailable(name, "register.nameUnavailable")  {
+   function register(address newRegisterAddr, bytes32 name, bytes epk) external nameAvailable(name, "register.nameUnavailable")  {
       if (msg.value > 0)
          newRegisterAddr.send(msg.value);
-
-      testaddr = newRegisterAddr;
-      testname = name;
-
-      data[newRegisterAddr].length = d.length;
-      datalen[newRegisterAddr] = d.length;
-      data[newRegisterAddr] = d;
 
       bytes32 oldName = nameByAddr[newRegisterAddr];
 
@@ -54,6 +47,11 @@ contract NameReg {
 
       nameByAddr[newRegisterAddr] = name;
       addrByName[name] = newRegisterAddr;
+
+      // save encrypted private key at registration
+      userData[newRegisterAddr]["epk"].length = epk.length;
+      userDataLen[newRegisterAddr]["epk"] = epk.length;
+      userData[newRegisterAddr]["epk"] = epk;
 
       registerEvent(newRegisterAddr, "register", true);
    }
@@ -70,32 +68,35 @@ contract NameReg {
       nameByAddr[newOwner] = name;
       addrByName[name] = newOwner;
 
-      data[newOwner].length = data[tx.origin].length;
-      data[newOwner] = data[tx.origin];
-      datalen[newOwner] = datalen[tx.origin];
-
       registerEvent(tx.origin, "transfer", true);
+      registerEvent(newOwner, "transfer", true);
    }
 
-   function editData(uint len, bytes d) external {
-      data[tx.origin].length = d.length;
-      datalen[tx.origin] = d.length;
-      data[tx.origin] = d;
+   function transferDataField(bytes32 field, address newOwner) {
+      userDataLen[newOwner][field] = userDataLen[tx.origin][field];
+      delete userDataLen[tx.origin][field];
 
-      registerEvent(tx.origin, "editData", true);
+      userData[newOwner][field].length = userData[tx.origin][field].length;
+      userData[newOwner][field] = userData[tx.origin][field];
+      delete userData[tx.origin][field];
+
+      registerEvent(tx.origin, field, true);
+      registerEvent(newOwner, field, true);
    }
 
-   function test(bytes32 name) external {
-      testname = name;
-     // testaddr = addr;
+   function editField(bytes32 f, bytes input) external {
+      userData[tx.origin][f].length = input.length;
+      userDataLen[tx.origin][f] = input.length;
+      userData[tx.origin][f] = input;
+
+      registerEvent(tx.origin, f, true);
    }
 
    address public owner;
-   address public testaddr;
-   bytes32 public testname;
 
-   mapping (address => bytes) public data;
-   mapping (address => uint) public datalen;
+   mapping (address => mapping (bytes32 => bytes)) public userData;
+   mapping (address => mapping (bytes32 => uint)) public userDataLen;
+
    mapping (address => bytes32) public nameByAddr;
    mapping (bytes32 => address) public addrByName;
-}
+}    
