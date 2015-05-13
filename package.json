@@ -15,6 +15,7 @@
     	"morgan": "~1.0.0",
     	"request": "*",
     	"ethereumjs-lib": "*",
+    	"pg": "*",
     	"body-parser": "~1.0.0"
     }
 }

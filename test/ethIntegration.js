@@ -17,6 +17,22 @@ var url_base = 'http://' + API_HOST + ':' + API_PORT;
 
 var BLOCK_WAIT = 20000;
 
+// Random String for testing
+function stringGen(len)
+{
+    var text = " ";
+
+    var charset = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < len; i++ )
+        text += charset.charAt(Math.floor(Math.random() * charset.length));
+
+    return text;
+}
+
+var email = stringGen(4) + "@gmail.com";
+var epk = stringGen(20);
+var name = stringGen(8);
 
 describe("initialize namereg contract", function() {
     it("Contract exists", function() {
@@ -28,7 +44,7 @@ describe("initialize namereg contract", function() {
 
         before(function(done) {
             superagent.post(url_base + '/register')
-                .send({address: web3.eth.coinbase, name: "ck", email: "ckeenan89@gmail.com", epk: "0123s09s091209123"})
+                .send({address: web3.eth.coinbase, name: name, email: email, epk: epk})
                 .end(function(err, res) {
                     if (err) throw err;
                     registerTxHash = res.body.data.txhash;
@@ -38,7 +54,7 @@ describe("initialize namereg contract", function() {
         });
 
         it("user name registered", function(done){
-            superagent.get(url_base + '/profile/name/ck')
+            superagent.get(url_base + '/profile/name/' + name)
                 .end(function(err, res) {
                     assert.equal(res.body.success, true);
                     done();
