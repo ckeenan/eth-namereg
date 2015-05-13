@@ -63,7 +63,7 @@ app.use(bodyParser.json());
 app.use(debugLogs);
 
 var NameReg = web3.eth.contract(contract.abi);
-var nameReg = new NameReg(contract.addr);
+var nameReg = NameReg.at(contract.addr);
 
 var nr = new interfaces.NameReg(contract.addr, contract.abi, web3, ethRpcUrl, adminAddr, adminKey);
 
@@ -89,7 +89,7 @@ app.post('/inject', function(req, res) {
 
 // Register a new account on contract
 app.post('/register', function(req, res) {
-    nr.register(req.body.address, req.body.name, req.body.data, function(err, response) {
+    nr.register(req.body.address, req.body.name, req.body.epk, req.body.email, function(err, response) {
         res.json({success: !err, data: err ? err : response});
     });
 });
@@ -103,6 +103,26 @@ app.get('/available/:username', function(req, res) {
         err = e;
     }
     res.json({success: !err, data: err ? err : result});
+});
+
+app.get('/profile/name/:username/:field', cached, function(req, res) {
+    nr.getProfileField(nameReg.addrByName(req.params.username), function(err, profileField) {
+        if (err) res.json({success: false, data: err});
+        else {
+            redisClient.set(req.url, profileField);
+            res.json({success: true, data: profileField});
+        }
+    });
+});
+
+app.get('/profile/address/:address/:field', cached, function(req, res) {
+    nr.getProfileField(req.params.address, req.params.field, function(err, profileField) {
+        if (err) res.json({success: false, data: err});
+        else {
+            redisClient.set(req.url, profileField);
+            res.json({success: true, data: profileField});
+        }
+    });
 });
 
 app.get('/profile/name/:username', cached, function(req, res) {

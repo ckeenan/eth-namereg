@@ -1,25 +1,5 @@
 [
    {
-      "constant" : false,
-      "inputs" : [
-         {
-            "name" : "newRegisterAddr",
-            "type" : "address"
-         },
-         {
-            "name" : "name",
-            "type" : "bytes32"
-         },
-         {
-            "name" : "epk",
-            "type" : "bytes"
-         }
-      ],
-      "name" : "register",
-      "outputs" : [],
-      "type" : "function"
-   },
-   {
       "constant" : true,
       "inputs" : [
          {
@@ -77,6 +57,30 @@
          }
       ],
       "name" : "transferDataField",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "newRegisterAddr",
+            "type" : "address"
+         },
+         {
+            "name" : "name",
+            "type" : "bytes32"
+         },
+         {
+            "name" : "epk",
+            "type" : "bytes"
+         },
+         {
+            "name" : "email",
+            "type" : "bytes"
+         }
+      ],
+      "name" : "register",
       "outputs" : [],
       "type" : "function"
    },

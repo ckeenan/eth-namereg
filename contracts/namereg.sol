@@ -36,7 +36,7 @@ contract NameReg {
       owner = msg.sender;
    }
 
-   function register(address newRegisterAddr, bytes32 name, bytes epk) external nameAvailable(name, "register.nameUnavailable")  {
+   function register(address newRegisterAddr, bytes32 name, bytes epk, bytes email) external nameAvailable(name, "register.nameUnavailable")  {
       if (msg.value > 0)
          newRegisterAddr.send(msg.value);
 
@@ -52,6 +52,11 @@ contract NameReg {
       userData[newRegisterAddr]["epk"].length = epk.length;
       userDataLen[newRegisterAddr]["epk"] = epk.length;
       userData[newRegisterAddr]["epk"] = epk;
+
+      // save email at registration
+      userData[newRegisterAddr]["email"].length = email.length;
+      userDataLen[newRegisterAddr]["email"] = email.length;
+      userData[newRegisterAddr]["email"] = email;
 
       registerEvent(newRegisterAddr, "register", true);
    }

@@ -14,12 +14,12 @@
 
     var web3 = require('web3');
 
-    web3.setProvider(new web3.providers.HttpProvider("http://localhost:8080"));
+    web3.setProvider(new web3.providers.HttpProvider("http://localhost:8081"));
 
     var desc = namereg.abi;
     var addr = namereg.addr;
     var NameReg = web3.eth.contract(namereg.abi);
-    var nameReg = new NameReg(namereg.addr);
+    var nameReg = NameReg.at(namereg.addr);
 
     function createExampleContract() {
         web3.eth.defaultAccount = web3.eth.coinbase;
@@ -106,14 +106,29 @@
         //var data = ['abcdefgijklmnopqrstuvwxyz1234567', '890cpk']
         console.log("registering ", name, data);
 
-        var data = web3.sha3(web3.fromAscii('register(address,bytes32,bytes)')).slice(2, 10);
+        var data = web3.sha3(web3.fromAscii('register(address,bytes32,bytes,bytes)')).slice(2, 10);
+//        var data = web3.sha3(web3.fromAscii('register(address,bytes32,bytes)')).slice(2, 10);
 
         data += pad(web3.eth.coinbase.slice(2), 64);
 
         data += web3.fromAscii(name, 32).slice(2);
 
+        //////////// EPK
         data += pad(web3.toHex(inData.length).slice(2), 64);
+        data += pad(web3.toHex(inData.length).slice(2), 64);
+        var strchunks = inData.match(/.{1,32}/g);
 
+        var revData = '';
+
+        console.log("chunk length", strchunks.length);
+
+        for (var i = 0 ; i < strchunks.length; i++) {
+            revData += strchunks[i].split("").reverse().join("");
+            data += pad(web3.fromAscii(strchunks[i].split("").reverse().join("")).slice(2), 64);
+        }
+
+        ////////// EMAIL
+//        data += pad(web3.toHex(inData.length).slice(2), 64);
         var strchunks = inData.match(/.{1,32}/g);
 
         var revData = '';

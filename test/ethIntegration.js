@@ -8,7 +8,7 @@ web3.setProvider(new web3.providers.HttpProvider('http://localhost:8080'));
 
 var namereg = require('../contracts');
 var NameReg = web3.eth.contract(namereg.abi);
-var nameReg = new NameReg(namereg.addr);
+var nameReg = NameReg.at(namereg.addr);
 
 var API_PORT = process.env.API_PORT || 8000;
 var API_HOST = process.env.API_HOST || 'localhost';
@@ -28,7 +28,7 @@ describe("initialize namereg contract", function() {
 
         before(function(done) {
             superagent.post(url_base + '/register')
-                .send({address: web3.eth.coinbase, name: "ck", data: "{test: true}"})
+                .send({address: web3.eth.coinbase, name: "ck", email: "ckeenan89@gmail.com", epk: "0123s09s091209123"})
                 .end(function(err, res) {
                     if (err) throw err;
                     registerTxHash = res.body.data.txhash;
