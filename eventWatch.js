@@ -65,9 +65,9 @@ function getRange(cb) {
 }
 
 function register(args, cb) {
-    logger.info("registering address", addr);
     pg.connect(pgConnection, function(err, client, done) {
         var addr = args.owner;
+        logger.info("registering address", addr);
         if (err) {
             done();
             logger.error("error connecting to postgres", err);
@@ -130,7 +130,6 @@ function run(cb) {
 }
 
 run(function(err) {
-    logger.error("uncaught error when running", err);
     if (!err) {
         redisClient.set('currentBlock', lastBlock, function(err, res) {
             if (err) logger.error("error setting currentBlock", err);
@@ -138,6 +137,7 @@ run(function(err) {
             process.exit();
         });
     } else {
+        logger.error("uncaught error when running", err);
         throw err;
         process.exit();
     }

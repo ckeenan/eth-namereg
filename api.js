@@ -15,6 +15,7 @@ var contract = require('./contracts');
 var redisHost = process.env.REDIS_HOST || 'localhost';
 var redisPort = process.env.REDIS_PORT || 6379;
 var port = process.env.PORT || 8000;
+var NOCACHE = process.env.NOCACHE || false;
 
 // TODO: Change these defaults to something other than SHA3(1) :) (also probably should change the 
 var adminKey = new Buffer(process.env.KEY || '044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d', 'hex');
@@ -48,6 +49,7 @@ var debugLogs = function(req, res, next) {
 
 var cached = function(req, res, next) {
     if (req.method !== 'GET') return next();
+    if (NOCACHE) return next();
     var cache = {success: false, data: {}};
 
     redisClient.get(req.url, function(err, reply) {
