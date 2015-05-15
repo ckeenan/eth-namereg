@@ -132,8 +132,11 @@ app.get('/profile/name/:username', cached, function(req, res) {
     nr.getProfile(nameReg.addrByName(req.params.username), function(err, profile) {
         if (err) res.json({success: false, data: err});
         else {
-            redisClient.set(req.url, profile);
-            res.json({success: true, data: profile});
+            redisClient.set(req.url, JSON.stringify(profile));
+            redisClient.get(profile.addr + '.id', function(err, userid) {
+                if (!err) profile.id = userid;
+                res.json({success: true, data: profile});
+            });
         }
     });
 });
@@ -142,7 +145,7 @@ app.get('/profile/address/:addr', cached, function(req, res) {
     nr.getProfile(req.params.addr, function(err, profile) {
         if (err) res.json({success: false, data: err});
         else {
-            redisClient.set(req.url, profile);
+            redisClient.set(req.url, JSON.stringify(profile));
             res.json({success: true, data: profile});
         }
     });

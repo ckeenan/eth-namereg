@@ -1,0 +1,88 @@
+<!doctype>
+<html>
+
+<head>
+<script type="text/javascript" src="node_modules/web3/dist/web3.js"></script>
+<script type="text/javascript" src="lib/vendor/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="lib/vendor/bitcoinjs-min.js"></script>
+<script type="text/javascript" src="lib/vendor/sjcl.js"></script>
+<script type="text/javascript" src="lib/vendor/aes.js"></script>
+<script type="text/javascript" src="lib/vendor/sha256.js"></script>
+<script type="text/javascript" src="lib/vendor/sha3.js"></script>
+<script src="fabriqwallet.js"></script>
+<script type="text/javascript" src="./contracts.js"></script>
+<script type="text/javascript">
+
+    function pad(n, width, z) {
+        z = z || '0';
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    }
+
+    var w = new FabriqWallet('http://localhost:8000');
+
+    function checkRegister() {
+        console.log("checking user validity");
+        w.validate(function(err, id) {
+            console.log("ERR, ID", err, id);
+            if (!err && id) {
+                console.log("user validated");
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        });
+    }
+    var intervalId;
+    var registering = localStorage.getItem('registering');
+    if (registering && registering.length > 0) registering = JSON.parse(registering);
+    if (registering) watchValid();
+
+    function watchValid() {
+        if (!intervalId)
+            intervalId = setInterval(checkRegister, 5000);
+    }
+
+    function register() {
+        var username = document.getElementById('reg.name').value;
+        var password = document.getElementById('reg.pass').value;
+        console.log("REG", username, password);
+        w.create(username, password, "ckeenan98@gmail.com", function(err, res) {
+            console.log("CREATE", err, res);
+        });
+        localStorage.setItem('registering', 'true');
+        watchValid();
+    }
+
+    function login() {
+        var username = document.getElementById('log.name').value;
+        var password = document.getElementById('log.pass').value;
+
+        w.load(username, password, function(err, res) {
+            console.log("LOGIN", err, res);
+        });
+    }
+
+</script>
+</head>
+<body>
+    <h1>Name registry client tests</h1>
+    <!-- <div id="source"></div>  -->
+
+    <div class='register'>
+        Register a Name
+        <input type="text" id="reg.name" placeholder="Name"></input>
+        <input type="text" id="reg.pass" placeholder="Pass"></input>
+        <input type="button" value="Register" onclick="register()"></input>
+    </div>
+
+    <div class='login'>
+        Existing user login
+        <input type="text" id="log.name" placeholder="Name"></input>
+        <input type="text" id="log.pass" placeholder="Pass"></input>
+        <input type="button" value="Register" onclick="login()"></input>
+    </div>
+
+    <div id="result"></div>
+    <div id="logs"></div>
+</body>
+</html>

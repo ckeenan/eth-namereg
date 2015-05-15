@@ -29,7 +29,6 @@ var adminKey = new Buffer(process.env.KEY || '044852b2a670ade5407e78fb2863c51de9
 var pgConnection = 'postgres://' + pgUser + ':' + pgPass + '@' + pgHost + ':' + pgPort + '/' + pgDb;
 
 var ethRpcUrl = 'http://' + rpchost + ':' + rpcport;
-console.log("ETHRPCURL", ethRpcUrl);
 
 log4js.configure({
     appenders: [
@@ -76,15 +75,16 @@ function register(args, cb) {
         }
 
         nr.getProfile(addr, function(err, profile) {
-            console.log("NR Profile", err, profile);
             if (err) return cb(err);
             client.query("INSERT INTO users (name, address, epk, email, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", 
                     [profile.name, profile.addr, profile.epk, profile.email, new Date(), new Date()], function(err, result) {
                         done();
                         if (err) return cb(err);
-                        console.log("REGISTER.id", result.rows[0].id);
                         args.id = result.rows[0].id;
-                        cb(err, args);
+                        // Set the user id in redis for api access (on profile lookup)
+                        redisClient.set(profile.addr + '.id', args.id, function(err) {
+                            cb(err, args);
+                        });
             });
         });
     });

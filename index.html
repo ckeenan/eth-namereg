@@ -92,60 +92,31 @@
         });
     }
 
-    function register(addr, name, data) {
-        if (typeof(name) === 'undefined' || typeof(data) === 'undefined') {
-            name = document.getElementById('reg.name').value;
-            data = document.getElementById('reg.data').value;
-        }
-
-        // Pretend private key
-        var inData = "12345678901234567890abcdefghijklmnopqrstuvwxyzzzzzzzzz";
-        //var inData = "ABC123";
+    function register() {
+        //var data = web3.sha3(web3.fromAscii('testIn(bytes32[],bytes32[])')).slice(2, 10);
+        var data = web3.sha3(web3.fromAscii('register(address,bytes32,bytes32[],bytes32[])')).slice(2, 10);
         var name = "Connor";
-        var address = '0x0';
-        //var data = ['abcdefgijklmnopqrstuvwxyz1234567', '890cpk']
-        console.log("registering ", name, data);
-
-        var data = web3.sha3(web3.fromAscii('register(address,bytes32,bytes,bytes)')).slice(2, 10);
-//        var data = web3.sha3(web3.fromAscii('register(address,bytes32,bytes)')).slice(2, 10);
+        var address = web3.eth.coinbase;
 
         data += pad(web3.eth.coinbase.slice(2), 64);
 
         data += web3.fromAscii(name, 32).slice(2);
 
-        //////////// EPK
-        data += pad(web3.toHex(inData.length).slice(2), 64);
-        data += pad(web3.toHex(inData.length).slice(2), 64);
-        var strchunks = inData.match(/.{1,32}/g);
+        data += pad(web3.toHex(1).slice(2), 64);
+        data += pad(web3.toHex(2).slice(2), 64);
 
-        var revData = '';
+        data += web3.fromAscii("TESTDATA", 32).slice(2);
+        data += web3.fromAscii("TESTDATA", 32).slice(2);
+        data += web3.fromAscii("WEIRD", 32).slice(2);
 
-        console.log("chunk length", strchunks.length);
-
-        for (var i = 0 ; i < strchunks.length; i++) {
-            revData += strchunks[i].split("").reverse().join("");
-            data += pad(web3.fromAscii(strchunks[i].split("").reverse().join("")).slice(2), 64);
-        }
-
-        ////////// EMAIL
-//        data += pad(web3.toHex(inData.length).slice(2), 64);
-        var strchunks = inData.match(/.{1,32}/g);
-
-        var revData = '';
-
-        console.log("chunk length", strchunks.length);
-
-        for (var i = 0 ; i < strchunks.length; i++) {
-            revData += strchunks[i].split("").reverse().join("");
-            data += pad(web3.fromAscii(strchunks[i].split("").reverse().join("")).slice(2), 64);
-        }
+        console.log("SENDING", data);
 
         web3.eth.sendTransaction({
             from: web3.eth.coinbase,
+            data: data,
             to: nameReg.address,
-            data: '0x' + data,
-            gasPrice: 10000000000000,
-            gas: 3000000
+            gas: 3000000,
+            gasPrice: 10000000000000
         });
     }
 
