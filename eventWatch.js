@@ -76,8 +76,8 @@ function register(args, cb) {
 
         nr.getProfile(addr, function(err, profile) {
             if (err) return cb(err);
-            client.query("INSERT INTO users (name, address, epk, email, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", 
-                    [profile.name, profile.addr, profile.epk, profile.email, new Date(), new Date()], function(err, result) {
+            client.query("INSERT INTO users (name, address, epk, email, created_at, updated_at, reputation) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", 
+                    [profile.name, profile.addr, profile.epk, profile.email, new Date(), new Date(), 0], function(err, result) {
                         done();
                         if (err) return cb(err);
                         args.id = result.rows[0].id;
