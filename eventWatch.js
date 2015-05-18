@@ -5,12 +5,15 @@ var async = require('async');
 var log4js = require('log4js');
 
 var utils = require('./lib/utils');
-var contract = require('./contracts');
+var NameRegJSON = require('./contracts').NameReg;
+var RepJSON = require('./contracts').Rep_Trimmed;
+
 var interfaces = require('./lib/interfaces');
 
 var redisHost = process.env.REDIS_HOST || 'localhost';
 var redisPort = process.env.REDIS_PORT || 6379;
-var nameRegAddr = process.env.NAMREG || contract.addr;
+var nameRegAddr = process.env.NAMREG || NameRegJSON.addr;
+var repAddr = process.env.REP || RepJSON.addr;
 
 var rpcport = process.env.RPCPORT || 8081;
 var rpchost = process.env.RPCHOST || 'localhost';
@@ -43,22 +46,38 @@ var redisClient = redis.createClient(redisPort, redisHost);
 
 web3.setProvider(new web3.providers.HttpProvider(ethRpcUrl));
 
-lastBlock = web3.eth.blockNumber - 1;
+var lastBlock = web3.eth.blockNumber;
 
-var NameReg = web3.eth.contract(contract.abi);
+var NameReg = web3.eth.contract(NameRegJSON.abi);
+var Rep = web3.eth.contract(RepJSON.abi);
 var nameReg = NameReg.at(nameRegAddr);
-var nr = new interfaces.NameReg(contract.addr, contract.abi, web3, ethRpcUrl, adminAddr, adminKey);
-
-var events = [
-    'registerEvent'
-];
+var rep = Rep.at(repAddr);
+var nr = new interfaces.NameReg(nameRegAddr, NameRegJSON.abi, web3, ethRpcUrl, adminAddr, adminKey);
 
 function getRange(cb) {
+    // Get the last block searched
     redisClient.get('currentBlock', function(err, res) {
         if (!res) res = 0;
+        res = Math.min(res, lastBlock);
         cb(err, {
             start: res,
             end: lastBlock
+        });
+    });
+}
+
+function getRep(addr, cb) {
+    cb(rep.users(addr)[0].toString());
+}
+
+function updateRep(args, cb) {
+    getRep(args.user, function(userRep) {
+        pg.connect(pgConnection, function(err, client, done) {
+            client.query("UPDATE users SET reputation = $1 WHERE address = $2", [userRep, args.user], function(err, result) {
+                done();
+                cb(err, args);
+            });
+
         });
     });
 }
@@ -90,13 +109,17 @@ function register(args, cb) {
     });
 }
 function handleMessage(args, cb) {
-        if (args.hasOwnProperty('message')  && args.message === 'register') {
+    if (args.hasOwnProperty('message')) {
+        if (args.message === 'register')
             register(args, cb);
-        } else cb(null, args);
+        if (args.message === 'rep.created' || args.message ===  'beam.sent' || args.message === 'beam.received') {
+            updateRep(args, cb);
+        }
+    } else cb(null, args);
 }
 
-function getLogs(eventName, range, cb) {
-    var logEvent = nameReg[eventName]({}, {
+function getLogs(contract, range, cb) {
+    var logEvent = contract.registerEvent({}, {
         fromBlock: range.start,
         toBlock: range.end
     });
@@ -125,13 +148,18 @@ function run(cb) {
     getRange(function(err, range) {
         logger.info("get logs for range", range);
         if (err) return cb(err);
-        getLogs('registerEvent', range, cb);
+        async.eachSeries([
+                nameReg,
+                rep
+                ], function(contract, next) {
+                    getLogs(contract, range, next);
+                }, cb);
     });
 }
 
 run(function(err) {
     if (!err) {
-        redisClient.set('currentBlock', lastBlock, function(err, res) {
+        redisClient.set('currentBlock', lastBlock + 1, function(err, res) {
             if (err) logger.error("error setting currentBlock", err);
             redisClient.end();
             process.exit();

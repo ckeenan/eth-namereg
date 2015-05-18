@@ -1,0 +1,175 @@
+[
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "_to",
+            "type" : "address"
+         },
+         {
+            "name" : "_amount",
+            "type" : "uint256"
+         }
+      ],
+      "name" : "beam",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "_link",
+            "type" : "bytes32[]"
+         }
+      ],
+      "name" : "submitVerifiedLink",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "_action",
+            "type" : "bytes32"
+         },
+         {
+            "name" : "_amount",
+            "type" : "uint256"
+         }
+      ],
+      "name" : "setReward",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "_for",
+            "type" : "address"
+         },
+         {
+            "name" : "_reward",
+            "type" : "bytes32"
+         }
+      ],
+      "name" : "unlockRep",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [
+         {
+            "name" : "",
+            "type" : "bytes32"
+         }
+      ],
+      "name" : "rewards",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "uint256"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "_for",
+            "type" : "address"
+         },
+         {
+            "name" : "_status",
+            "type" : "bool"
+         }
+      ],
+      "name" : "setVerified",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         },
+         {
+            "name" : "",
+            "type" : "address"
+         }
+      ],
+      "name" : "links",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "bool"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         }
+      ],
+      "name" : "users",
+      "outputs" : [
+         {
+            "name" : "balance",
+            "type" : "uint256"
+         },
+         {
+            "name" : "verified",
+            "type" : "bool"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "constant" : true,
+      "inputs" : [],
+      "name" : "admin",
+      "outputs" : [
+         {
+            "name" : "",
+            "type" : "address"
+         }
+      ],
+      "type" : "function"
+   },
+   {
+      "inputs" : [],
+      "type" : "constructor"
+   },
+   {
+      "anonymous" : false,
+      "inputs" : [
+         {
+            "indexed" : true,
+            "name" : "user",
+            "type" : "address"
+         },
+         {
+            "indexed" : false,
+            "name" : "message",
+            "type" : "bytes32"
+         },
+         {
+            "indexed" : false,
+            "name" : "result",
+            "type" : "bool"
+         }
+      ],
+      "name" : "registerEvent",
+      "type" : "event"
+   }
+]

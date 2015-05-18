@@ -9,7 +9,8 @@ var redis = require('redis');
 
 var interfaces = require('./lib/interfaces');
 var utils = require('./lib/utils');
-var contract = require('./contracts');
+var NameRegJSON = require('./contracts').NameReg;
+var RepJSON = require('./contracts').Rep_Trimmed;
 
 // ENV configs
 var redisHost = process.env.REDIS_HOST || 'localhost';
@@ -21,7 +22,8 @@ var NOCACHE = process.env.NOCACHE || false;
 var adminKey = new Buffer(process.env.KEY || '044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d', 'hex');
 var adminAddr = process.env.ADDR || '82a978b3f5962a5b0957d9ee9eef472ee55b42f1';
 
-var nameRegAddr = process.env.NAMREG || contract.addr;
+var nameRegAddr = process.env.NAMREG || NameRegJSON.addr;
+console.log("nameReg", nameRegAddr);
 var rpcport = process.env.RPCPORT || 8080;
 var rpchost = process.env.RPCHOST || 'localhost';
 var logFile = process.env.LOGFILE || 'logs/api.log';
@@ -64,10 +66,13 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(debugLogs);
 
-var NameReg = web3.eth.contract(contract.abi);
-var nameReg = NameReg.at(contract.addr);
+var NameReg = web3.eth.contract(NameRegJSON.abi);
+var nameReg = NameReg.at(NameRegJSON.addr);
 
-var nr = new interfaces.NameReg(contract.addr, contract.abi, web3, ethRpcUrl, adminAddr, adminKey);
+var Rep = web3.eth.contract(RepJSON.abi);
+var rep = Rep.at(RepJSON.addr);
+
+var nr = new interfaces.NameReg(NameRegJSON.addr, NameRegJSON.abi, web3, ethRpcUrl, adminAddr, adminKey);
 
 app.listen(port);
 
@@ -92,8 +97,20 @@ app.post('/inject', function(req, res) {
 // Register a new account on contract
 app.post('/register', function(req, res) {
     nr.register(req.body.address, req.body.name, req.body.epk, req.body.email, function(err, response) {
+        rep.unlockRep.sendTransaction(req.body.address, "init", {from: web3.eth.coinbase, gasPrice: 100000000000000, gas: 1000000});
         res.json({success: !err, data: err ? err : response});
     });
+});
+
+app.get('/addr/:username', function(req, res) {
+    var name = req.params.username;
+    try {
+        var addr = nameReg.addrByName(req.params.username);
+        res.json({success: true, data: addr});
+    } catch (e) {
+        res.json({success: false, data: e});
+    }
+
 });
 
 app.get('/available/:username', function(req, res) {

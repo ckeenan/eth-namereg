@@ -36,16 +36,38 @@ function loadContract(name, done) {
     });
 }
 
-loadContract("NameReg", function(cObj) {
-    web3.eth.sendTransaction({
-        from: web3.eth.coinbase,
-        data: cObj.binary,
-        gas: 3000000,
-        gasPrice: 100000000000000
-    }, function(err, res) {
-        if (err) throw err;
-        console.log("Contract created at address: ", res);
-        cObj.addr = res;
-        fs.writeFile('contracts.js', '\nvar namereg=' + JSON.stringify(cObj) + ';\nif (typeof module !== "undefined") module.exports=namereg;', process.exit);
+var contracts = {};
+function sendContract(name, cb) {
+    loadContract(name, function(cObj) {
+        web3.eth.sendTransaction({
+            from: web3.eth.coinbase,
+            data: cObj.binary,
+            gas: 3000000,
+            gasPrice: 100000000000000
+        }, function(err, res) {
+            if (err) throw err;
+            console.log("Contract created at address: ", res);
+            cObj.addr = res;
+            contracts[name] = cObj;
+            // Wait for block
+            setTimeout(cb, 20000);
+        });
+    });
+}
+
+sendContract("NameReg", function() {
+    sendContract("Rep_Trimmed", function() {
+        writeContractFile(process.exit);
     });
 });
+
+function writeContractFile(cb) {
+    var vars = '';
+    var exports = 'if (typeof module !== "undefined") module.exports= {';
+    Object.keys(contracts).forEach(function(key) {
+        vars += '\nvar ' + key + ' = ' + JSON.stringify(contracts[key]) + ';';
+        exports += '\n\t' + key + ': ' + key + ',';
+    });
+    exports += '\n};';
+    fs.writeFile('contracts.js', vars + exports, cb);
+}
