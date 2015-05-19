@@ -12,6 +12,7 @@ var interfaces = require('./lib/interfaces');
 
 var redisHost = process.env.REDIS_HOST || 'localhost';
 var redisPort = process.env.REDIS_PORT || 6379;
+var redisPass = process.env.REDIS_PASS || '';
 var nameRegAddr = process.env.NAMREG || NameRegJSON.addr;
 var repAddr = process.env.REP || RepJSON.addr;
 
@@ -43,6 +44,10 @@ log4js.configure({
 var logger = log4js.getLogger();
 
 var redisClient = redis.createClient(redisPort, redisHost);
+if (redisPass.length)
+    redisClient.auth(redisPass, function() {
+        console.log("redis client authed");
+    });
 
 web3.setProvider(new web3.providers.HttpProvider(ethRpcUrl));
 
@@ -58,7 +63,9 @@ function getRange(cb) {
     // Get the last block searched
     redisClient.get('currentBlock', function(err, res) {
         if (!res) res = 0;
-        res = Math.min(res, lastBlock);
+        //res = Math.min(res, lastBlock);
+        res = parseInt(res);
+        if (res > lastBlock) return cb("Too soon: waiting until block " + res);
         cb(err, {
             start: res,
             end: lastBlock
@@ -146,8 +153,8 @@ function getLogs(contract, range, cb) {
 
 function run(cb) {
     getRange(function(err, range) {
-        logger.info("get logs for range", range);
         if (err) return cb(err);
+        logger.info("get logs for range", range);
         async.eachSeries([
                 nameReg,
                 rep
@@ -165,8 +172,7 @@ run(function(err) {
             process.exit();
         });
     } else {
-        logger.error("uncaught error when running", err);
-        throw err;
+        logger.warn(err);
         process.exit();
     }
 });

@@ -5,6 +5,7 @@ var async = require('async');
 
 var RPC_PORT = process.env.RPCPORT || 8080;
 var RPC_HOST = process.env.RPCHOST || 'localhost';
+var adminAddr = process.env.ADDR || '82a978b3f5962a5b0957d9ee9eef472ee55b42f1';
 var ethRpcUrl = 'http://' + RPC_HOST + ':' + RPC_PORT;
 
 
@@ -40,7 +41,7 @@ var contracts = {};
 function sendContract(name, cb) {
     loadContract(name, function(cObj) {
         web3.eth.sendTransaction({
-            from: web3.eth.coinbase,
+            from: adminAddr,
             data: cObj.binary,
             gas: 3000000,
             gasPrice: 100000000000000

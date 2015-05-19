@@ -15,8 +15,10 @@ var RepJSON = require('./contracts').Rep_Trimmed;
 // ENV configs
 var redisHost = process.env.REDIS_HOST || 'localhost';
 var redisPort = process.env.REDIS_PORT || 6379;
+var redisPass = process.env.REDIS_PASS || '';
 var port = process.env.PORT || 8000;
-var NOCACHE = process.env.NOCACHE || false;
+//var NOCACHE = process.env.NOCACHE || false;
+var NOCACHE = true;
 
 // TODO: Change these defaults to something other than SHA3(1) :) (also probably should change the 
 var adminKey = new Buffer(process.env.KEY || '044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d', 'hex');
@@ -29,6 +31,11 @@ var rpchost = process.env.RPCHOST || 'localhost';
 var logFile = process.env.LOGFILE || 'logs/api.log';
 
 var redisClient = redis.createClient(redisPort, redisHost);
+
+if (redisPass.length)
+    redisClient.auth(redisPass, function() {
+        console.log("redis client authed");
+    });
 
 var ethRpcUrl = 'http://' + rpchost + ':' + rpcport;
 web3.setProvider(new web3.providers.HttpProvider(ethRpcUrl));
@@ -97,7 +104,7 @@ app.post('/inject', function(req, res) {
 // Register a new account on contract
 app.post('/register', function(req, res) {
     nr.register(req.body.address, req.body.name, req.body.epk, req.body.email, function(err, response) {
-        rep.unlockRep.sendTransaction(req.body.address, "init", {from: web3.eth.coinbase, gasPrice: 100000000000000, gas: 1000000});
+        rep.unlockRep.sendTransaction(req.body.address, "init", {from: adminAddr, gasPrice: 100000000000000, gas: 1000000});
         res.json({success: !err, data: err ? err : response});
     });
 });
