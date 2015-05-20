@@ -73,6 +73,12 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(debugLogs);
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 var NameReg = web3.eth.contract(NameRegJSON.abi);
 var nameReg = NameReg.at(NameRegJSON.addr);
 
