@@ -30,7 +30,14 @@ var pgDb = process.env.PGDB || 'fabriq_dev';
 var adminAddr = process.env.ADDR || '82a978b3f5962a5b0957d9ee9eef472ee55b42f1';
 var adminKey = new Buffer(process.env.KEY || '044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d', 'hex');
 
-var pgConnection = 'postgres://' + pgUser + ':' + pgPass + '@' + pgHost + ':' + pgPort + '/' + pgDb;
+var pgConnection = {
+    user: pgUser,
+    password: pgPass,
+    database: pgDb,
+    port: pgPort,
+    host: pgHost,
+    ssl: true
+};
 
 var ethRpcUrl = 'http://' + rpchost + ':' + rpcport;
 
