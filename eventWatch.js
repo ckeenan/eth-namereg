@@ -26,6 +26,7 @@ var pgPass = process.env.PGPASS || '';
 var pgHost = process.env.PGHOST || 'localhost';
 var pgPort = process.env.PGPORT || '5432';
 var pgDb = process.env.PGDB || 'fabriq_dev';
+var pgSSL = process.env.PGSSL || false;
 
 var adminAddr = process.env.ADDR || '82a978b3f5962a5b0957d9ee9eef472ee55b42f1';
 var adminKey = new Buffer(process.env.KEY || '044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d', 'hex');
@@ -36,15 +37,15 @@ var pgConnection = {
     database: pgDb,
     port: pgPort,
     host: pgHost,
-    ssl: true
+    ssl: pgSSL
 };
 
 var ethRpcUrl = 'http://' + rpchost + ':' + rpcport;
 
 log4js.configure({
     appenders: [
-        {type: 'console'},
-        {type: 'file', filename: logFile, maxLogSize: 20480}
+    {type: 'console'},
+    {type: 'file', filename: logFile, maxLogSize: 20480}
     ]
 });
 
@@ -118,22 +119,44 @@ function register(args, cb) {
                         redisClient.set(profile.addr + '.id', args.id, function(err) {
                             cb(err, args);
                         });
-            });
+                    });
         });
     });
 }
+
+function linkUsers(args, cb) {
+    pg.connect(pgConnection, function(err, client, done) {
+        var sql = "INSERT INTO links (fromuser, touser) VALUES ($1, $2), ($2, $1)";
+
+        var vals = [
+            args.user,
+            args.user2
+        ];
+
+        client.query(sql, vals, function(err) {
+            done();
+            console.log("ERR", err);
+            if (!err) args.success = true;
+            cb(err, args);
+        });
+    });
+}
+
 function handleMessage(args, cb) {
     if (args.hasOwnProperty('message')) {
-        if (args.message === 'register')
+        if (args.message === 'register') {
             register(args, cb);
-        if (args.message === 'rep.created' || args.message ===  'beam.sent' || args.message === 'beam.received') {
+        } else if (args.message === 'rep.created' || args.message ===  'beam.sent' || args.message === 'beam.received') {
             updateRep(args, cb);
-        }
+        } else cb(null, args);
+    } else if (args.hasOwnProperty('user2')) {
+        linkUsers(args, cb);
     } else cb(null, args);
 }
 
-function getLogs(contract, range, cb) {
-    var logEvent = contract.registerEvent({}, {
+function getLogs(contract, eventName, range, cb) {
+    if (!contract.hasOwnProperty(eventName)) return cb();
+    var logEvent = contract[eventName]({}, {
         fromBlock: range.start,
         toBlock: range.end
     });
@@ -142,7 +165,6 @@ function getLogs(contract, range, cb) {
         if (err) return cb(err);
         async.each(logs, function(log, next) {
             logger.info("saving", utils.formatHex(log.transactionHash), log.args);
-            var msg = log.args.message;
             handleMessage(log.args, function(err, res) {
                 if (!err) {
                     redisClient.set(utils.formatHex(log.transactionHash), JSON.stringify(res), function(err, res) {
@@ -165,9 +187,16 @@ function run(cb) {
         async.eachSeries([
                 nameReg,
                 rep
-                ], function(contract, next) {
-                    getLogs(contract, range, next);
-                }, cb);
+        ], function(contract, next) {
+            async.eachSeries([
+                    'registerEvent',
+                    'linkEvent'
+            ], function(eventName, nextEvent) {
+                getLogs(contract, eventName, range, nextEvent);
+            }, function(err) {
+                next();
+            });
+        }, cb);
     });
 }
 

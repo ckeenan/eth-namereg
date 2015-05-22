@@ -60,6 +60,18 @@
       "type" : "function"
    },
    {
+      "constant" : false,
+      "inputs" : [
+         {
+            "name" : "_to",
+            "type" : "address"
+         }
+      ],
+      "name" : "link",
+      "outputs" : [],
+      "type" : "function"
+   },
+   {
       "constant" : true,
       "inputs" : [
          {
@@ -170,6 +182,23 @@
          }
       ],
       "name" : "registerEvent",
+      "type" : "event"
+   },
+   {
+      "anonymous" : false,
+      "inputs" : [
+         {
+            "indexed" : true,
+            "name" : "user",
+            "type" : "address"
+         },
+         {
+            "indexed" : false,
+            "name" : "user2",
+            "type" : "address"
+         }
+      ],
+      "name" : "linkEvent",
       "type" : "event"
    }
 ]

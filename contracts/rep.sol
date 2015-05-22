@@ -2,6 +2,7 @@ contract Rep_Trimmed {
     //admin priming removed to fit into gas costs
  
     event registerEvent(address indexed user, bytes32 message, bool result);
+    event linkEvent(address indexed user, address user2);
  
     modifier isAdmin() {
         if (msg.sender == admin) {
@@ -49,26 +50,21 @@ contract Rep_Trimmed {
                 registerEvent(_to, "beam.received", true);
             }
         }
- 
-        link(msg.sender, _to);
     }
  
     //at every beam, see if they've connected. If not & verified, issue 1 token each.
-    function link(address _to) private {
+    function link(address _to) {
         address _from = msg.sender;
-        if(users[_from].verified == true && users[_to].verified == true) {
-            //Not really necessary to check both, but might want to async in the future.
             if(links[_from][_to] == false && links[_to][_from] == false) {
                 links[_from][_to] = true;
                 links[_to][_from] = true;
  
-                registerEvent(_from, "link.from", true);
-                registerEvent(_to, "link.to", true);
- 
+                linkEvent(_from, _to);
+
                 createRep(_from, 1);
                 createRep(_to, 1);
             }
-        }
+//        }
     }
  
  
