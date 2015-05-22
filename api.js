@@ -123,7 +123,17 @@ app.get('/addr/:username', function(req, res) {
     } catch (e) {
         res.json({success: false, data: e});
     }
+});
 
+app.get('/unlock/:username', function(req, res) {
+    var name = req.params.username;
+    try {
+        var addr = nameReg.addrByName(req.params.username);
+        rep.unlockRep.sendTransaction(addr, "init", {from: adminAddr, gasPrice: 100000000000000, gas: 1000000});
+        res.json({success: true, data: addr});
+    } catch (e) {
+        res.json({success: false, data: e});
+    }
 });
 
 app.get('/available/:username', function(req, res) {
